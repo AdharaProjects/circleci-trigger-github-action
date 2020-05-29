@@ -13,6 +13,10 @@ const {
       if(!token){
         return core.setFailed('Missing CircleCI token');
       };
+      const workflow = core.getInput("workflow");
+      if(!token){
+        return core.setFailed('Missing CircleCI workflow');
+      };
       const orgInput = core.getInput("org");
       const repoInput = core.getInput("repo");
       const branchInput = core.getInput("branch");
@@ -24,7 +28,8 @@ const {
       const res = await postCircleciAction({
         token,
         repoName,
-        branchName
+        branchName,
+	workflow
       });
 
       console.log(`Job ${res.statusText}`);
@@ -40,10 +45,10 @@ const {
     }
   })();
   
-  async function postCircleciAction({ token, repoName, branchName }) {
+  async function postCircleciAction({ token, repoName, branchName, workflow }) {
     return await axios.post(`https://circleci.com/api/v1.1/project/github/${repoName}/tree/${branchName}`,{
         build_parameters:{
-            CIRCLE_JOB : 'build'
+            CIRCLE_JOB : workflow
         }},{
           headers: {
               'Content-Type': 'application/json',
