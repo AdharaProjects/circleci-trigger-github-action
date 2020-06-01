@@ -13,10 +13,6 @@ const {
       if(!token){
         return core.setFailed('Missing CircleCI token');
       };
-      const workflow = core.getInput("workflow");
-      if(!token){
-        return core.setFailed('Missing CircleCI workflow');
-      };
       const orgInput = core.getInput("org");
       const repoInput = core.getInput("repo");
       const branchInput = core.getInput("branch");
@@ -29,7 +25,6 @@ const {
         token,
         repoName,
         branchName,
-	workflow
       });
 
       console.log(`Job ${res.statusText}`);
@@ -45,18 +40,16 @@ const {
     }
   })();
   
-  async function postCircleciAction({ token, repoName, branchName, workflow }) {
-    return await axios.post(`https://circleci.com/api/v1.1/project/github/${repoName}/tree/${branchName}`,{
-        build_parameters:{
-            CIRCLE_JOB : workflow
-        }},{
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-          auth:{
-            username:token
-          }
-        }
-    );
+  async function postCircleciAction({ token, repoName, branchName }) {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Circle-Token': token
+      },
+      data: {"branch": branchName},
+      url: `https://circleci.com/api/v2/project/github/${repoName}/pipeline`,
+    };
+    return await axios(options);
   }
